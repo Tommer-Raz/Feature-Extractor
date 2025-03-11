@@ -15,14 +15,12 @@ def detect_outliers_zscore(df, threshold=3):
     return outliers
 
 def detect_low_variance(df, threshold=0.01):
-    """Identify columns with low variance."""
     numeric_df = df.select_dtypes(include=["number"])
     variances = numeric_df.var()
     low_variance_cols = [col for col in variances.index if variances[col] < threshold]
     return low_variance_cols
 
 def handle_skewness(df):
-    """Apply log transformation to highly skewed columns."""
     numeric_df = df.select_dtypes(include=["number"])
     skewness = numeric_df.apply(lambda x: skew(x.dropna()))  # Exclude NaNs
     skewed_cols = skewness[abs(skewness) > 1].index.tolist()
@@ -34,7 +32,6 @@ def handle_skewness(df):
     return transformed_df, skewed_cols
 
 def detect_high_cardinality(df, threshold=50, relative_threshold=0.1):
-    """Detect high-cardinality categorical columns."""
     categorical_df = df.select_dtypes(include=["object", "category"])
     high_card_cols = []
     
@@ -49,7 +46,6 @@ def detect_high_cardinality(df, threshold=50, relative_threshold=0.1):
     return high_card_cols
 
 def detect_frequent_and_rare_categories(df, freq_threshold=0.05, rare_threshold=0.01):
-    """Detect frequent and rare categories in categorical columns."""
     categorical_df = df.select_dtypes(include=["object", "category"])
     frequent_categories = {}
     rare_categories = {}
@@ -65,13 +61,12 @@ def detect_frequent_and_rare_categories(df, freq_threshold=0.05, rare_threshold=
     return frequent_categories, rare_categories
 
 def suggest_encoding_method(df):
-    """Suggest encoding methods based on patterns in categorical columns."""
     encoding_suggestions = {}
     
     categorical_df = df.select_dtypes(include=["object", "category"])
     high_cardinality_cols = detect_high_cardinality(df)
+
     for col in categorical_df.columns:
-        # 1. High Cardinality
         if col in high_cardinality_cols:
             encoding_suggestions[col] = "Target Encoding or Frequency Encoding"
         else:
