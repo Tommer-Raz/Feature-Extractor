@@ -52,7 +52,9 @@ def detect_frequent_and_rare_categories(df, freq_threshold=0.05, rare_threshold=
     
     for col in categorical_df.columns:
         value_counts = df[col].value_counts(normalize=True)  # Get percentage of each category
-        frequent = value_counts[value_counts > freq_threshold].index.tolist()
+        
+        # Get the categories which the percentage of them are higher or lower then the threshhold
+        frequent = value_counts[value_counts > freq_threshold].index.tolist() 
         rare = value_counts[value_counts < rare_threshold].index.tolist()
 
         frequent_categories[col] = frequent
