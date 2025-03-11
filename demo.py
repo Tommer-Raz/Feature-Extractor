@@ -4,7 +4,7 @@ import requests
 url = "http://127.0.0.1:8000/upload/"
 
 # File path (replace with your actual CSV file)
-file_path = "student_performance_large_dataset.csv"
+file_path = "demo.py"
 
 # Open the file and send it in the request
 with open(file_path, "rb") as file:

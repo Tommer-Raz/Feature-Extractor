@@ -60,3 +60,19 @@ def detect_frequent_and_rare_categories(df, freq_threshold=0.05, rare_threshold=
         rare_categories[col] = rare
 
     return frequent_categories, rare_categories
+
+def suggest_encoding_method(df):
+    """Suggest encoding methods based on patterns in categorical columns."""
+    encoding_suggestions = {}
+    
+    categorical_df = df.select_dtypes(include=["object", "category"])
+    high_cardinality_cols = detect_high_cardinality(df)
+    for col in categorical_df.columns:
+        # 1. High Cardinality
+        if col in high_cardinality_cols:
+            encoding_suggestions[col] = "Target Encoding or Frequency Encoding"
+
+        else:
+            encoding_suggestions[col] = "One-Hot Encoding"
+    
+    return encoding_suggestions
