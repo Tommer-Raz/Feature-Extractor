@@ -4,7 +4,7 @@ import io
 from feature_extraction import *
 app = FastAPI()
 
-@app.post("/extract-features/")
+@app.post("/upload/")
 async def extract_features(file: UploadFile = File(...)):
     # Read the CSV file
     contents = await file.read()
@@ -27,7 +27,9 @@ async def extract_features(file: UploadFile = File(...)):
     numeric_df = df.select_dtypes(include=["number"])
     features["outliers"] = detect_outliers_zscore(numeric_df)
     features["low_variance_columns"] = detect_low_variance(numeric_df)
-
+    transformed_df, skewed_cols = handle_skewness(numeric_df)
+    features["skewed_columns"] = skewed_cols
+    features["high_cardinality_columns"] = detect_high_cardinality(df)
     return {"filename": file.filename, "features": features}
 
 # Run with: uvicorn main:app --reload
