@@ -48,13 +48,11 @@ def test_upload_valid_csv(valid_csv):
     assert "skewed_columns" in features
     assert "rare_categories" in features
 
-# ✅ Test: Uploading a non-CSV file
 def test_upload_non_csv(non_csv_file):
     response = client.post("/upload/", files={"file": ("data.txt", non_csv_file, "text/plain")})
     assert response.status_code == 400
     assert "Invalid file type" in response.json()["detail"]
 
-# ✅ Test: Uploading an invalid CSV file
 def test_upload_invalid_csv(invalid_csv):
     response = client.post("/upload/", files={"file": ("invalid.csv", invalid_csv, "text/csv")})
     assert response.status_code == 400
