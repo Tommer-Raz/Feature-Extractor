@@ -4,10 +4,11 @@ import numpy as np
 def detect_outliers_zscore(df, threshold=3):
     """Detect outliers using Z-score method."""
     outliers = {}
-
-    for col in df.columns:
-        clean_data = df[col].dropna() # remove nan values as they are not part of the zscore
-        z_scores = np.abs(zscore(clean_data))  # Calculate Z-scores
+    numeric_df = df.select_dtypes(include=["number"])
+    
+    for col in numeric_df.columns:
+        clean_data = numeric_df[col].dropna() # remove nan values as they are not part of the zscore
+        z_scores = np.abs(zscore(clean_data))  # Will use z score as it 
         outlier_values = clean_data[z_scores > threshold].tolist()
         outliers[col] = outlier_values
 
@@ -15,13 +16,15 @@ def detect_outliers_zscore(df, threshold=3):
 
 def detect_low_variance(df, threshold=0.01):
     """Identify columns with low variance."""
-    variances = df.var()
+    numeric_df = df.select_dtypes(include=["number"])
+    variances = numeric_df.var()
     low_variance_cols = [col for col in variances.index if variances[col] < threshold]
     return low_variance_cols
 
 def handle_skewness(df):
     """Apply log transformation to highly skewed columns."""
-    skewness = df.apply(lambda x: skew(x.dropna()))  # Exclude NaNs
+    numeric_df = df.select_dtypes(include=["number"])
+    skewness = numeric_df.apply(lambda x: skew(x.dropna()))  # Exclude NaNs
     skewed_cols = skewness[abs(skewness) > 1].index.tolist()
 
     transformed_df = df.copy()
@@ -71,7 +74,6 @@ def suggest_encoding_method(df):
         # 1. High Cardinality
         if col in high_cardinality_cols:
             encoding_suggestions[col] = "Target Encoding or Frequency Encoding"
-
         else:
             encoding_suggestions[col] = "One-Hot Encoding"
     

@@ -8,6 +8,27 @@ from feature_extraction import *
 app = FastAPI()
 logger = logging.getLogger('uvicorn.error')
 
+def extract_numeric_features(df):
+    features = {}
+
+    features["outliers"] = detect_outliers_zscore(df)
+    features["low_variance_columns"] = detect_low_variance(df)
+    transformed_df, skewed_cols = handle_skewness(df)
+    features["skewed_columns"] = skewed_cols
+
+    return features, transformed_df
+
+def extract_categorial_features(df):
+    features = {}
+
+    features["high_cardinality"] = detect_high_cardinality(df)
+    frequent_categories, rare_categories = detect_frequent_and_rare_categories(df)
+    features["frequent_categories"] = frequent_categories
+    features["rare_categories"] = rare_categories
+    features["suggested_encoding"] = suggest_encoding_method(df)
+
+    return features
+
 @app.post("/upload/")
 async def extract_features(file: UploadFile = File(...)):
     # Read the CSV file
@@ -26,21 +47,11 @@ async def extract_features(file: UploadFile = File(...)):
 
     if df.columns.duplicated().any():
         raise HTTPException(status_code=400, detail="CSV file contains duplicate column names.")
-    features = {}
+    
+    numeric_features, non_skew_df = extract_numeric_features(df)
+    categorial_features = extract_categorial_features(df)
 
-    numeric_df = df.select_dtypes(include=["number"])
-    features["outliers"] = detect_outliers_zscore(numeric_df)
-    features["low_variance_columns"] = detect_low_variance(numeric_df)
-    transformed_df, skewed_cols = handle_skewness(numeric_df)
-    features["skewed_columns"] = skewed_cols
-
-    features["high_cardinality_columns"] = detect_high_cardinality(df)
-    frequent_categories, rare_categories = detect_frequent_and_rare_categories(df)
-    features["frequent_categories"] = frequent_categories
-    features["rare_categories"] = rare_categories
-    features["suggested_encoding"] = suggest_encoding_method(df)
-
-    logger.info('POST /upload')
+    features = {**numeric_features, **categorial_features}
     return {"filename": file.filename, "features": features}
 
 if __name__ == "__main__":
