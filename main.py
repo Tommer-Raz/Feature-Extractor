@@ -1,7 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
 import pandas as pd
 import io
-from scipy.stats import zscore
 from feature_extraction import *
 app = FastAPI()
 
@@ -19,13 +18,15 @@ async def extract_features(file: UploadFile = File(...)):
     }
 
     # Statistical summary for numerical columns
-    numeric_df = df.select_dtypes(include=["number"])
-    if not numeric_df.empty:
-        stats = numeric_df.describe().to_dict()
-        features["statistics"] = stats
+    # numeric_df = df.select_dtypes(include=["number"])
+    # if not numeric_df.empty:
+    #     stats = numeric_df.describe().to_dict()
+    #     features["statistics"] = stats
 
     # Identify outliers using Z-score
-    features["outliers"] = detect_outliers_zscore(df)
+    numeric_df = df.select_dtypes(include=["number"])
+    features["outliers"] = detect_outliers_zscore(numeric_df)
+    features["low_variance_columns"] = detect_low_variance(numeric_df)
 
     return {"filename": file.filename, "features": features}
 
