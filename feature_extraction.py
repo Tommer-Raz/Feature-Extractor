@@ -44,3 +44,19 @@ def detect_high_cardinality(df, threshold=50, relative_threshold=0.1):
             high_card_cols.append(col)
 
     return high_card_cols
+
+def detect_frequent_and_rare_categories(df, freq_threshold=0.05, rare_threshold=0.01):
+    """Detect frequent and rare categories in categorical columns."""
+    categorical_df = df.select_dtypes(include=["object", "category"])
+    frequent_categories = {}
+    rare_categories = {}
+    
+    for col in categorical_df.columns:
+        value_counts = df[col].value_counts(normalize=True)  # Get percentage of each category
+        frequent = value_counts[value_counts > freq_threshold].index.tolist()
+        rare = value_counts[value_counts < rare_threshold].index.tolist()
+
+        frequent_categories[col] = frequent
+        rare_categories[col] = rare
+
+    return frequent_categories, rare_categories

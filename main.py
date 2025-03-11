@@ -23,13 +23,14 @@ async def extract_features(file: UploadFile = File(...)):
     #     stats = numeric_df.describe().to_dict()
     #     features["statistics"] = stats
 
-    # Identify outliers using Z-score
     numeric_df = df.select_dtypes(include=["number"])
     features["outliers"] = detect_outliers_zscore(numeric_df)
     features["low_variance_columns"] = detect_low_variance(numeric_df)
     transformed_df, skewed_cols = handle_skewness(numeric_df)
     features["skewed_columns"] = skewed_cols
+    
     features["high_cardinality_columns"] = detect_high_cardinality(df)
+    frequent_categories, rare_categories = detect_frequent_and_rare_categories(df)
+    features["frequent_categories"] = frequent_categories
+    features["rare_categories"] = rare_categories
     return {"filename": file.filename, "features": features}
-
-# Run with: uvicorn main:app --reload
