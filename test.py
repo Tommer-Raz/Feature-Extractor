@@ -15,7 +15,12 @@ CSV_CONTENT = """date,category,value
 2023-01-05,B,50
 """
 
-INVALID_CSV_CONTENT = """\tt\\\\\\\
+INVALID_CSV_CONTENT = """datecategory,value
+2023-01-01,A,10,
+2023-01-02,B,20,
+2023-01-0
+2023-01-04,A,40,,,,,,,,,,,
+202
 """
 
 @pytest.fixture
@@ -61,3 +66,15 @@ def test_upload_invalid_csv(invalid_csv):
 def test_upload_no_file():
     response = client.post("/upload/")
     assert response.status_code == 422  # FastAPI will return a 422 error for missing required fields
+
+def test_high_cardinality():
+    df = pd.DataFrame({
+        "category": [f"item_{i}" for i in range(100)],  # 100 unique categories
+        "value": range(100)
+    })
+    csv_data = df.to_csv(index=False).encode("utf-8")
+    response = client.post("/upload/", files={"file": ("high_cardinality.csv", io.BytesIO(csv_data), "text/csv")})
+    
+    assert response.status_code == 200
+    json_data = response.json()
+    assert "category" in json_data["features"]["high_cardinality"]

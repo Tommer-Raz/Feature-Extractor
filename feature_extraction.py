@@ -8,7 +8,7 @@ def detect_outliers_zscore(df, threshold=3):
     
     for col in numeric_df.columns:
         clean_data = numeric_df[col].dropna() # remove nan values as they are not part of the zscore
-        z_scores = np.abs(zscore(clean_data))  # Will use z score as it 
+        z_scores = np.abs(zscore(clean_data))  # Will use z score as it will be best to look at the entire dataset
         outlier_values = clean_data[z_scores > threshold].tolist()
         outliers[col] = outlier_values
 
